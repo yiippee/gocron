@@ -4,7 +4,10 @@ import (
 	"cron/master"
 	"flag"
 	"fmt"
+	"log"
+	"os"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -22,6 +25,15 @@ func initArg() {
 	flag.StringVar(&ConfigPath, "config", "./master.json", "配置文件路径")
 	flag.Parse()
 }
+
+func GetCurrentDirectory() string {
+	str, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return strings.Replace(str, "\\", "/", -1) //将\替换成/
+}
+
 func main() {
 	var (
 		err error
@@ -33,6 +45,7 @@ func main() {
 	initArg()
 
 	//加载配置文件
+	ConfigPath = GetCurrentDirectory() + "/master/main/master.json"
 	if err = master.InitConfig(ConfigPath); err != nil {
 		goto ERR
 	}
