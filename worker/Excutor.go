@@ -45,7 +45,8 @@ func (excutor *Excutor) ExcuteJob(info *common.JobExecting) {
 			//抢到了锁
 			jobExecRes.StartTime = time.Now()
 			//终止运行中的任务需要这里的上下文
-			cmd = exec.CommandContext(info.Ctx, "/bin/bash", "-c", info.Job.Command)
+			// cmd = exec.CommandContext(info.Ctx, "/bin/bash", "-c", info.Job.Command)
+			cmd = exec.CommandContext(info.Ctx, "cmd", "/c", info.Job.Command)
 			//执行并且捕获输出
 			res, err = cmd.CombinedOutput()
 			jobExecRes.Err = err

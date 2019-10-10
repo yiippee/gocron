@@ -40,13 +40,14 @@ func (logLink *logLink) writeLogLoop() {
 				//证明是已经提交了或者是刚刚进入
 				batch = &common.JobLogBatch{}
 				//超过规定阈值，进行自动提交
-				commitTimer = time.AfterFunc(time.Duration(G_config.LogConfig.LogAutoCommitTimeOut)*time.Millisecond, func(batch *common.JobLogBatch) func() {
-					//这里传入的batch会与外部的batch不相同
-					return func() {
-						//将传入的超时批次放到autoCommitChan，让select检索到去做后面的事情
-						logLink.autoCommitChan <- batch
-					}
-				}(batch))
+				commitTimer = time.AfterFunc(time.Duration(G_config.LogConfig.LogAutoCommitTimeOut)*time.Millisecond,
+					func(batch *common.JobLogBatch) func() {
+						//这里传入的batch会与外部的batch不相同
+						return func() {
+							//将传入的超时批次放到autoCommitChan，让select检索到去做后面的事情
+							logLink.autoCommitChan <- batch
+						}
+					}(batch))
 
 			}
 			batch.Logs = append(batch.Logs, log)

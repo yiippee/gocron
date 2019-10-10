@@ -34,6 +34,7 @@ func GetCurrentDirectory() string {
 	return strings.Replace(str, "\\", "/", -1) //将\替换成/
 }
 
+// master 是无状态的，可以部署多个，用于管理worker和job
 func main() {
 	var (
 		err error
