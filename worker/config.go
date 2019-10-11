@@ -24,6 +24,7 @@ type config struct {
 	EtcdConfig    etcdConfig    `json:"etcd"`
 	MongoDbConfig mongoDbConfig `json:"mongodb"`
 	LogConfig     LogConfig     `json:"log"`
+	LocalIP       string        `json:"localIP"`
 }
 
 //设置一个全局单例的config

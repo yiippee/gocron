@@ -1,4 +1,4 @@
-package main
+package dlock
 
 import (
 	"context"

@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"cron/common"
+	"log"
 	"net"
 	"time"
 
@@ -68,11 +69,14 @@ func (register *register) keepOnline() {
 	for {
 		ctxFunc = nil
 		//1.生成租约
-		if leaseGrantResp, err = register.lease.Grant(context.TODO(), 10); err != nil {
+		ctx, ctxFunc = context.WithTimeout(context.TODO(), 5*time.Second) // 设置超时时间，用于判断etcd是否启动
+		if leaseGrantResp, err = register.lease.Grant(ctx, 10); err != nil {
+			//
 			goto ReTry
 		}
 		//生成上下文
 		ctx, ctxFunc = context.WithCancel(context.TODO())
+
 		//自动续租
 		if leaseKeepRespChan, err = register.lease.KeepAlive(ctx, leaseGrantResp.ID); err != nil {
 			goto ReTry
@@ -120,9 +124,23 @@ func InitRegister() (err error) {
 	if client, err = clientv3.New(config); err != nil {
 		return
 	}
-	if ipv4, err = getLocalIp(); err != nil {
-		return
+
+	// 检测etcd状态
+	ctx, ctxFunc := context.WithTimeout(context.TODO(), 5*time.Second)
+	_, err = client.Status(ctx, config.Endpoints[0])
+	if err != nil {
+		log.Fatal(err)
 	}
+	ctxFunc()
+
+	ipv4 = G_config.LocalIP
+	// 如果没有配置ip，则从本机获取
+	if ipv4 == "" {
+		if ipv4, err = getLocalIp(); err != nil {
+			return
+		}
+	}
+
 	kv = clientv3.NewKV(client)
 	lease = clientv3.NewLease(client)
 	G_Register = &register{

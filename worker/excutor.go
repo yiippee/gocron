@@ -31,10 +31,12 @@ func (excutor *Excutor) ExcuteJob(info *common.JobExecting) {
 		}
 		//加入随机睡眠,让抢占更加公平
 		time.Sleep(time.Duration(rand.Intn(1000)) * time.Millisecond)
+
 		//加入分布式抢锁，否则多台机器同时运行，一个任务会被多台机器执行
 		jobLock = G_jobMgr.CreateJobLock(info.Job.Name)
 		//抢锁
 		err = jobLock.tryGetLock()
+
 		//内部用resflog做了判断，没有抢锁成功不会去再执行解除锁
 		defer jobLock.unlock()
 		if err != nil {
